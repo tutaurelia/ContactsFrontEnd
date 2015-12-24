@@ -1,0 +1,11 @@
+﻿<template>
+    <ai-dialog>
+        <ai-dialog-body>
+            <h3>Are you sure to delete contact '${contact.firstName} ${contact.lastName}'?</h3>
+        </ai-dialog-body>
+        <ai-dialog-footer>
+            <button class="btn btn-default" click.trigger="controller.cancel()">Cancel</button>
+            <button class="btn btn-primary" click.trigger="controller.ok()">Delete Contact</button>
+        </ai-dialog-footer>
+    </ai-dialog>
+</template>
