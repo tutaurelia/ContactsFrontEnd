@@ -1,36 +1,65 @@
+import {DeleteDialog} from "./delete-dialog";
 import {inject} from "aurelia-framework";
 import {HttpClient} from "aurelia-fetch-client";
-
-@inject(HttpClient)
-export class ContaqctsList {
-  searchEntry = "";
-  contacts = [];
-  contactId = "";
-  contact = "";
-  currentPage = 1;
-  textShowAll = "Show All";
+import {DialogService} from "aurelia-dialog";
 
 
-  constructor(private http : HttpClient) {
-    this.http = http;
-  }
+@inject(HttpClient, DialogService)
+export class ContactsList {
+    searchEntry = "";
+    contacts = [];
+    contactId = "";
+    contact = "";
+    currentPage = 1;
+    textShowAll = "Show All";
 
-  updateContacts() {
-      return this.http.fetch("contacts?query=" + this.searchEntry).then(response => response.json()).then(data => {
-        this.contacts = (<any> data).contacts;
-      });
-  }
+    constructor(private http: HttpClient, private dialogService : DialogService) {
+        this.http = http;
+        this.dialogService = dialogService;
+    }
 
-  get canSearch() {
-    return (this.searchEntry !== "");
-  }
 
-  activate() {
-    return this.updateContacts();
-  }
+    deleteDialog(contact) {
+        (<any>this.dialogService).open({ viewModel: DeleteDialog, model: contact }).then(response => {
+            if (!response.wasCancelled) {
+                this.http.fetch(`contacts/${contact.id}`, {
+                    method: "delete"
+                }).then(response => {
+                    this.updateContacts();
+                });
+            }
+        });
+    }
 
-  displayAllContacts() {
-    this.searchEntry = "";
-    this.activate();
-  }
+
+
+    updateContacts() {
+        return this.http.fetch(`contacts?query=${this.searchEntry}`).then(response => response.json()).then(data => {
+            this.contacts = (<any>data).contacts;
+        });
+    }
+
+
+    
+    reset() {
+        this.http.fetch("contacts/reset", {
+            method: "post"
+        }).then(response => {
+            this.searchEntry = "";
+            this.updateContacts();    
+        });
+    }
+
+    get canSearch() {
+        return (this.searchEntry !== "");
+    }
+
+    activate() {
+        return this.updateContacts();
+    }
+
+    displayAllContacts() {
+        this.searchEntry = "";
+        this.activate();
+    }
 }
